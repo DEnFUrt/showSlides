@@ -7,8 +7,19 @@ const slides = document.querySelectorAll('.slider-item'),
     dotWrap = document.querySelector('.slider-dots'),
     dotBtns = dotWrap.querySelectorAll('.dot');
 
-let slideIndex = 0;
-//END INIT CONSTANTS
+let slideIndex = 0,
+    autoShow = false;
+    //END INIT CONSTANTS
+    
+function autoShowStart() {
+    const autoStepId = setInterval( () => {
+        if (!autoShow) {
+            clearInterval(autoStepId);
+            return;
+        }
+        stepSlides(1);
+    }, 5000);
+}
 
 const onShow = index => {
     slides[index].style.display = 'block';
@@ -18,6 +29,21 @@ const onShow = index => {
 const onHide = index => {
     slides[index].style.display = 'none';
     dotBtns[index].classList.remove('dot-active');
+};
+
+const stepSlides = step => {
+    onHide(slideIndex);
+    switch (true) {
+        case (slideIndex + step < 0) :
+            slideIndex = slides.length - 1;
+            break;
+        case (slideIndex + step > slides.length - 1) :
+            slideIndex = 0;
+            break;
+        default :
+            slideIndex += step;
+    }
+    onShow(slideIndex);
 };
 
 dotWrap.addEventListener('click', (e) => {
@@ -38,15 +64,14 @@ dotWrap.addEventListener('click', (e) => {
 });
 
 prevBtn.addEventListener('click', () => {
-    onHide(slideIndex);
-    slideIndex === 0 ? slideIndex = slides.length - 1 : --slideIndex;
-    onShow(slideIndex);
+    stepSlides(-1);
+    autoShow = false;
 });
 
 nextBtn.addEventListener('click', () => {
-    onHide(slideIndex);
-    slideIndex === slides.length - 1 ? slideIndex = 0 : ++slideIndex;
-    onShow(slideIndex);
+    stepSlides(1);
+    autoShow = true;
+    autoShowStart();
 });
 
 //Инициализируем Slides при старте скрипта
